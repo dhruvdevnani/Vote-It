@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Vote It</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+
+    <div class="card animate-fade-in" style="width: 100%; max-width: 400px; padding: 2.5rem;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <a href="index.html" class="logo" style="font-size: 2rem;">
+                <i class="fa-solid fa-square-poll-vertical"></i> Vote It
+            </a>
+            <p id="authSubtitle" style="color: var(--text-muted); margin-top: 0.5rem;">Sign in to create your first poll
+            </p>
+        </div>
+
+        <button class="btn btn-outline" style="width: 100%; margin-bottom: 1rem; justify-content: center;">
+            <i class="fa-brands fa-google"></i> Continue with Google
+        </button>
+        <button class="btn btn-outline" style="width: 100%; margin-bottom: 1.5rem; justify-content: center;">
+            <i class="fa-brands fa-github"></i> Continue with GitHub
+        </button>
+
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-muted);">
+            <div style="flex: 1; height: 1px; background: var(--border);"></div>
+            <span>OR</span>
+            <div style="flex: 1; height: 1px; background: var(--border);"></div>
+        </div>
+
+        <form onsubmit="handleLogin(event)">
+            <div id="nameGroup" class="input-group" style="display: none;">
+                <label>Full Name</label>
+                <input type="text" id="nameInput" class="input-control" placeholder="John Doe">
+            </div>
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" class="input-control" placeholder="you@example.com" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" class="input-control" placeholder="••••••••" required>
+            </div>
+            <button id="submitBtn" type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">Log
+                In</button>
+            <p id="toggleText" style="text-align: center; font-size: 0.9rem; color: var(--text-muted);">
+                Don't have an account? <a href="#" onclick="toggleAuthMode(event)"
+                    style="color: var(--primary); text-decoration: none;">Sign up</a>
+            </p>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let isLogin = true;
+
+        function toggleAuthMode(e) {
+            e.preventDefault();
+            isLogin = !isLogin;
+
+            const subtitle = document.getElementById('authSubtitle');
+            const btn = document.getElementById('submitBtn');
+            const toggleText = document.getElementById('toggleText');
+            const nameGroup = document.getElementById('nameGroup');
+            const nameInput = document.getElementById('nameInput');
+
+            if (isLogin) {
+                document.title = 'Login - Vote It';
+                subtitle.textContent = 'Sign in to create your first poll';
+                btn.textContent = 'Log In';
+                toggleText.innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleAuthMode(event)" style="color: var(--primary); text-decoration: none;">Sign up</a>';
+                nameGroup.style.display = 'none';
+                nameInput.required = false;
+            } else {
+                document.title = 'Sign Up - Vote It';
+                subtitle.textContent = 'Create an account to get started';
+                btn.textContent = 'Sign Up';
+                toggleText.innerHTML = 'Already have an account? <a href="#" onclick="toggleAuthMode(event)" style="color: var(--primary); text-decoration: none;">Log in</a>';
+                nameGroup.style.display = 'block';
+                nameInput.required = true;
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            // Simulate login/signup
+            const nameInput = document.getElementById('nameInput');
+            const name = isLogin ? 'Demo User' : (nameInput.value || 'New User');
+            localStorage.setItem('user', JSON.stringify({ name: name, role: 'creator' }));
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+
+</html>

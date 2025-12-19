@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Poll - Vote It</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .poll-type-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .poll-type-card:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .poll-type-card.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .poll-type-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Custom Checkbox Toggle */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container nav-wrapper">
+            <a href="dashboard.html" class="logo">
+                <i class="fa-solid fa-square-poll-vertical"></i> Vote It
+            </a>
+            <nav class="nav-links">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <button id="themeBtn" onclick="toggleTheme()" class="btn btn-outline"
+                    style="padding: 0.5rem; width: 40px; height: 40px; border-radius: 50%; margin-right: 1rem;">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span id="userName" style="font-weight: 600;">User</span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" style="padding: 3rem 1.5rem; max-width: 800px;">
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <h1
+                style="font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Create a New Poll</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem;">Design your poll and share it with the world.</p>
+        </div>
+
+        <form id="createPollForm" class="card animate-fade-in" style="padding: 2.5rem;">
+            <!-- Title Section -->
+            <div style="margin-bottom: 2rem;">
+                <label
+                    style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; display: block;">Poll
+                    Details</label>
+                <input type="text" name="title" class="input-control" placeholder="What's your question?"
+                    style="font-size: 1.25rem; padding: 1rem; font-weight: 500;" required>
+                <textarea name="description" class="input-control" rows="2"
+                    placeholder="Add a description (optional)..." style="margin-top: 1rem; resize: none;"></textarea>
+            </div>
+
+            <!-- Poll Type Selection -->
+            <div style="margin-bottom: 2rem;">
+                <label
+                    style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem; display: block;">Poll
+                    Type</label>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div class="poll-type-card selected" onclick="selectType('single', this)">
+                        <i class="fa-regular fa-circle-check poll-type-icon"></i>
+                        <div style="font-weight: 600;">Single Choice</div>
+                    </div>
+                    <div class="poll-type-card" onclick="selectType('multiple', this)">
+                        <i class="fa-solid fa-list-check poll-type-icon"></i>
+                        <div style="font-weight: 600;">Multiple Choice</div>
+                    </div>
+                    <div class="poll-type-card" onclick="selectType('rating', this)">
+                        <i class="fa-regular fa-star poll-type-icon"></i>
+                        <div style="font-weight: 600;">Star Rating</div>
+                    </div>
+                </div>
+                <input type="hidden" name="type" id="pollTypeInput" value="single">
+            </div>
+
+            <!-- Options Section -->
+            <div style="margin-bottom: 2rem;">
+                <label
+                    style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem; display: block;">Options</label>
+                <div id="optionsContainer">
+                    <div class="option-item">
+                        <i class="fa-solid fa-grip-lines" style="color: var(--border); cursor: grab;"></i>
+                        <input type="text" class="input-control option-input" placeholder="Option 1" required>
+                    </div>
+                    <div class="option-item">
+                        <i class="fa-solid fa-grip-lines" style="color: var(--border); cursor: grab;"></i>
+                        <input type="text" class="input-control option-input" placeholder="Option 2" required>
+                    </div>
+                </div>
+                <button type="button" onclick="addOption()" class="btn btn-outline"
+                    style="width: 100%; border-style: dashed; margin-top: 0.5rem; color: var(--primary); border-color: var(--primary);">
+                    <i class="fa-solid fa-plus"></i> Add Another Option
+                </button>
+            </div>
+
+            <!-- Settings Section -->
+            <div
+                style="margin-bottom: 2rem; background: var(--bg-body); padding: 1.5rem; border-radius: var(--radius);">
+                <label
+                    style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem; display: block;">Settings</label>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Ends At</label>
+                        <input type="datetime-local" name="expiry" class="input-control" required>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-weight: 500; margin-bottom: 0.25rem;">Hide Results</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Voters can't see results until
+                                ended</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="hideResults">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div
+                style="display: flex; justify-content: flex-end; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                <a href="dashboard.html" class="btn btn-outline" style="min-width: 100px;">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="min-width: 140px; font-weight: 600;">
+                    Create Poll <i class="fa-solid fa-arrow-right" style="margin-left: 0.5rem;"></i>
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof Store === 'undefined' || typeof generateId === 'undefined' || typeof checkAuth === 'undefined') {
+                console.error('System Error: Core scripts (script.js) failed to load properly.');
+                alert('System Error: Core application scripts failed to load. Please refresh the page.');
+                return;
+            }
+
+            const user = checkAuth();
+            if (user) {
+                const userNameEl = document.getElementById('userName');
+                if (userNameEl) userNameEl.textContent = user.name;
+            }
+
+            // Set default expiry to 24h from now
+            try {
+                const now = new Date();
+                now.setHours(now.getHours() + 24);
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+                const expiryInput = document.querySelector('input[name="expiry"]');
+                if (expiryInput) {
+                    expiryInput.value = formattedDateTime;
+                }
+            } catch (e) {
+                console.error('Error setting default date:', e);
+            }
+
+            // Poll Type Selection Logic
+            window.selectType = function (type, element) {
+                document.getElementById('pollTypeInput').value = type;
+                document.querySelectorAll('.poll-type-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                element.classList.add('selected');
+            };
+
+            // Add Option Logic
+            window.addOption = function () {
+                const container = document.getElementById('optionsContainer');
+                if (!container) return;
+
+                const count = container.children.length + 1;
+                const div = document.createElement('div');
+                div.className = 'option-item';
+                div.innerHTML = `
+                    <i class="fa-solid fa-grip-lines" style="color: var(--border); cursor: grab;"></i>
+                    <input type="text" class="input-control option-input" placeholder="Option ${count}" required>
+                    <button type="button" onclick="this.parentElement.remove()" class="btn btn-outline" 
+                        style="padding: 0.5rem; width: 36px; height: 36px; color: var(--text-muted); border: none; background: transparent;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            };
+
+            const form = document.getElementById('createPollForm');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    try {
+                        const formData = new FormData(e.target);
+                        const optionsInputs = document.querySelectorAll('.option-input');
+                        const options = Array.from(optionsInputs).map(input => ({
+                            text: input.value.trim(),
+                            votes: 0
+                        })).filter(opt => opt.text !== '');
+
+                        if (options.length < 2) {
+                            alert('Please add at least 2 valid options.');
+                            return;
+                        }
+
+                        const title = formData.get('title');
+                        if (!title || title.trim() === '') {
+                            alert('Please enter a poll title.');
+                            return;
+                        }
+
+                        const newPoll = {
+                            id: generateId(),
+                            title: title,
+                            description: formData.get('description'),
+                            type: formData.get('type'),
+                            expiry: new Date(formData.get('expiry')).toISOString(),
+                            hideResults: formData.get('hideResults') === 'on',
+                            options: options,
+                            totalVotes: 0,
+                            status: 'active',
+                            createdAt: new Date().toISOString(),
+                            creator: user ? user.name : 'Anonymous'
+                        };
+
+                        Store.savePoll(newPoll);
+                        window.location.href = 'dashboard.html';
+                    } catch (error) {
+                        console.error('Error creating poll:', error);
+                        alert('Failed to create poll: ' + error.message);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

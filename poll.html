@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote - Vote It</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .result-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container nav-wrapper">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-square-poll-vertical"></i> Vote It
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="dashboard.html" class="nav-link">Create Poll</a>
+                <button id="themeBtn" onclick="toggleTheme()" class="btn btn-outline"
+                    style="padding: 0.5rem; width: 40px; height: 40px; border-radius: 50%;">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" style="padding: 4rem 1.5rem; max-width: 700px;">
+        <div id="pollContainer" class="card animate-fade-in">
+            <!-- Content injected by JS -->
+            <div style="text-align: center; padding: 2rem;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+                <p>Loading Poll...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pollId = urlParams.get('id');
+            const poll = Store.getPoll(pollId);
+            const container = document.getElementById('pollContainer');
+
+            // Check if already voted
+            const votedPolls = JSON.parse(localStorage.getItem('votedPolls') || '[]');
+            const hasVoted = votedPolls.includes(pollId);
+            const isExpired = poll ? new Date(poll.expiry) < new Date() : false;
+
+            if (!poll) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem;">
+                        <i class="fa-solid fa-circle-exclamation" style="font-size: 3rem; color: var(--danger); margin-bottom: 1rem;"></i>
+                        <h2>Poll Not Found</h2>
+                        <p style="color: var(--text-muted);">The poll ID you entered does not exist.</p>
+                        <a href="index.html" class="btn btn-primary" style="margin-top: 1.5rem;">Go Home</a>
+                    </div>
+                `;
+            } else if (isExpired) {
+                showResults();
+            } else if (hasVoted) {
+                if (poll.hideResults) {
+                    showHiddenResultsMessage();
+                } else {
+                    showResults();
+                }
+            } else {
+                showVotingUI();
+            }
+
+            function showHiddenResultsMessage() {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem 1.5rem;">
+                        <div style="width: 80px; height: 80px; background: rgba(34, 197, 94, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                            <i class="fa-solid fa-check" style="font-size: 2.5rem; color: var(--success);"></i>
+                        </div>
+                        <h1 style="margin-bottom: 1rem;">Vote Submitted!</h1>
+                        <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                            Thank you for participating. The results are hidden until the poll ends on <strong>${formatDate(poll.expiry)}</strong>.
+                        </p>
+                        <div style="display: flex; gap: 1rem; justify-content: center;">
+                            <a href="index.html" class="btn btn-outline">Back to Home</a>
+                            <button onclick="window.location.reload()" class="btn btn-primary">Refresh Page</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function showVotingUI() {
+                let optionsHtml = '';
+                poll.options.forEach((opt, index) => {
+                    optionsHtml += `
+                        <div class="poll-option" onclick="selectOption(${index})">
+                            <span style="font-weight: 500;">${opt.text}</span>
+                            <div class="radio-circle" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border);"></div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = `
+                    <div style="margin-bottom: 2rem;">
+                        <span style="background: var(--primary); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; display: inline-block;">Active Poll</span>
+                        <h1 style="margin-bottom: 0.5rem;">${poll.title}</h1>
+                        <p style="color: var(--text-muted);">${poll.description || ''}</p>
+                        <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
+                            <i class="fa-regular fa-clock"></i> Ends: ${formatDate(poll.expiry)}
+                        </div>
+                    </div>
+
+                    <div id="optionsList">
+                        ${optionsHtml}
+                    </div>
+
+                    <button id="submitVote" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" disabled onclick="submitVote()">
+                        Submit Vote
+                    </button>
+                    
+                    <div style="margin-top: 2rem; text-align: center;">
+                        <!-- QR Code removed -->
+                    </div>
+                `;
+            }
+
+            window.selectedIndex = -1;
+
+            window.selectOption = function (index) {
+                window.selectedIndex = index;
+                const options = document.querySelectorAll('.poll-option');
+                options.forEach((opt, i) => {
+                    if (i === index) {
+                        opt.classList.add('selected');
+                        opt.querySelector('.radio-circle').style.backgroundColor = 'var(--primary)';
+                        opt.querySelector('.radio-circle').style.borderColor = 'var(--primary)';
+                    } else {
+                        opt.classList.remove('selected');
+                        opt.querySelector('.radio-circle').style.backgroundColor = 'transparent';
+                        opt.querySelector('.radio-circle').style.borderColor = 'var(--border)';
+                    }
+                });
+                document.getElementById('submitVote').disabled = false;
+            };
+
+            window.submitVote = function () {
+                if (window.selectedIndex === -1) return;
+
+                Store.vote(pollId, window.selectedIndex);
+
+                // Mark as voted
+                const voted = JSON.parse(localStorage.getItem('votedPolls') || '[]');
+                voted.push(pollId);
+                localStorage.setItem('votedPolls', JSON.stringify(voted));
+
+                if (poll.hideResults) {
+                    showHiddenResultsMessage();
+                } else {
+                    showResults();
+                }
+            };
+
+            function showResults() {
+                // Refresh poll data to get latest votes
+                const latestPoll = Store.getPoll(pollId);
+                const total = latestPoll.totalVotes;
+
+                let resultsHtml = '';
+                latestPoll.options.forEach(opt => {
+                    const percentage = total === 0 ? 0 : Math.round((opt.votes / total) * 100);
+                    resultsHtml += `
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="font-weight: 500;">${opt.text}</span>
+                                <span style="font-weight: 600;">${percentage}%</span>
+                            </div>
+                            <div style="height: 8px; background: var(--bg-input); border-radius: 4px; overflow: hidden;">
+                                <div class="result-bar" style="width: ${percentage}%;"></div>
+                            </div>
+                            <div style="text-align: right; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                ${opt.votes} votes
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <h1 style="margin-bottom: 0.5rem;">${latestPoll.title}</h1>
+                        <p style="color: var(--text-muted);">Results</p>
+                    </div>
+
+                    <div style="background: var(--bg-body); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border);">
+                        ${resultsHtml}
+                    </div>
+
+                    <div style="margin-top: 2rem; text-align: center; color: var(--text-muted);">
+                        <p>Total Votes: ${total}</p>
+                    </div>
+
+                    <div style="margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                        <div style="display: flex; gap: 1rem;">
+                            <a href="index.html" class="btn btn-outline">Create Your Own Poll</a>
+                            <button onclick="sharePoll()" class="btn btn-primary"><i class="fa-solid fa-share-nodes"></i> Share Results</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            window.sharePoll = function () {
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Link copied!');
+                });
+            };
+        });
+    </script>
+</body>
+
+</html>

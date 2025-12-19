@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote It - Premium Polling System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="container nav-wrapper">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-square-poll-vertical"></i> Vote It
+            </a>
+            <nav class="nav-links">
+                <a href="login.html" class="btn btn-primary">Get Started</a>
+                <button id="themeBtn" onclick="toggleTheme()" class="btn btn-outline"
+                    style="padding: 0.5rem; width: 40px; height: 40px; border-radius: 50%;">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="container" style="padding: 6rem 1.5rem; text-align: center;">
+            <div class="animate-fade-in">
+                <span
+                    style="color: var(--secondary); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-size: 0.9rem;">The
+                    Future of Voting</span>
+                <h1 style="font-size: 3.5rem; font-weight: 800; margin: 1rem 0; line-height: 1.1;">
+                    Create Polls that <br>
+                    <span
+                        style="background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Spark
+                        Conversations</span>
+                </h1>
+                <p style="color: var(--text-muted); font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem;">
+                    Engage your audience with real-time, secure, and beautiful polls.
+                    From live events to social feedback, Vote It handles it all.
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a href="dashboard.html" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                        Create a Poll <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <div class="input-group" style="margin: 0; display: flex;">
+                        <input type="text" id="pollIdInput" placeholder="Enter Poll ID (e.g. PL-72X)"
+                            class="input-control"
+                            style="border-top-right-radius: 0; border-bottom-right-radius: 0; width: 200px;">
+                        <button onclick="joinPollGlobal()" class="btn btn-outline"
+                            style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none;">
+                            Join
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
